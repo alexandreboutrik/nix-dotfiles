@@ -1,0 +1,8 @@
+export PATH="${PATH}:${HOME}/.local/bin:${HOME}/.npm-global/bin"
+
+alias nixupgrade="nix-channel --update && nixos-rebuild switch --upgrade"
+
+export PS1="\n\[\033[1;32m\]  [\u]  [\w] \$ \[\033[0m\]"
+
+mkdir -p ~/.npm-global
+npm config set prefix '~/.npm-global'

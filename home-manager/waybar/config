@@ -1,0 +1,45 @@
+/*
+ * Alexandre Boutrik's Waybar config.
+ * Heavily based on JaKooLit's "[DARK] Minimal - Long" config.
+ */
+
+{
+  "include": [
+    "$HOME/.config/waybar/modules",
+  ],
+
+  "layer": "top",
+  "exclusive": true,
+  "passthrough": false,
+  "position": true,
+  "spacing": 6,
+  "fixed-center": true,
+  "ipc": true,
+  "margin-top": 8,
+  "margin-left": 8,
+  "margin-right": 8,
+
+  "modules-left": [
+    "custom/menu",
+    "custom/separator#blank",
+    "custom/lock",
+    "custom/separator#blank",
+    "hyprland/workspaces#pacman",
+    "custom/separator#blank",
+  ],
+  "modules-center": [
+    "clock",
+  ],
+  "modules-right": [
+    "temperature", "cpu", "memory", "disk",
+    "custom/separator#blank",
+    "backlight",
+    "network",
+    "custom/separator#blank",
+    "battery",
+    "custom/separator#blank",
+    "pulseaudio",
+    "custom/separator#blank",
+    "custom/power",
+  ]
+}
