@@ -34,6 +34,7 @@ in
 			texstudio texlive.combined.scheme-full
 			typst tinymist
 			marktext
+			tree-sitter
 
 			# Development
 			gh git

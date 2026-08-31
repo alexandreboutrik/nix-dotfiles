@@ -3,6 +3,7 @@ local M = {}
 -- Tools that format via standard input/output (runs BEFORE save)
 M.stdin_formatters = {
 	lua = "stylua -",
+	nix = "nixpkgs-fmt",
 	javascript = "prettier --stdin-filepath %",
 	typescript = "prettier --stdin-filepath %",
 	typescriptreact = "prettier --stdin-filepath %",

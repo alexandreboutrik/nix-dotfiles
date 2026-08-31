@@ -7,14 +7,14 @@
 {
   imports =
     [
-      ./modules/security.nix				# security module.
-      ./modules/iptables.nix				# netfilter.
-      ./modules/systemd.nix					# systemd services hardening.
-			./modules/virtualisation.nix	# vms, containers and sandboxes.
-			./modules/desktop.nix					# wm, audio, fonts, input, themes.
-			./modules/users.nix						# accounts and groups.
-      ./apps/firefox.nix						# firefox policies.json/user.js.
-      ./home-manager/main.nix				# home dotfiles.
+      ./modules/security.nix # security module.
+      ./modules/iptables.nix # netfilter.
+      ./modules/systemd.nix # systemd services hardening.
+      ./modules/virtualisation.nix # vms, containers and sandboxes.
+      ./modules/desktop.nix # wm, audio, fonts, input, themes.
+      ./modules/users.nix # accounts and groups.
+      ./apps/firefox.nix # firefox policies.json/user.js.
+      ./home-manager/main.nix # home dotfiles.
     ];
 
   nixpkgs.config.allowUnfree = true;
@@ -36,16 +36,16 @@
     efi.canTouchEfiVariables = true;
   };
 
-	# Kernel version
-	boot.kernelPackages = pkgs.linuxPackages_latest;
+  # Kernel version
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # Disable systemd and bios naming schemes.
   boot.kernelParams = [
     "net.ifnames=0"
     "biosdevname=0"
     "acpi_osi=Linux"
-    "i915.enable_dpst=0" 
-    "i915.enable_fbc=0" 
+    "i915.enable_dpst=0"
+    "i915.enable_fbc=0"
     "i915.enable_psr=0"
   ];
 
@@ -56,13 +56,13 @@
   #boot.kernelModules = [ "btusb" ];
   hardware.bluetooth = {
     enable = false;
-  #  powerOnBoot = false;
-  #  settings = {
-  #    General = {
-  #      Enable = "Source,Sink,Media,Socket"; # A2DP
-  #      ControllerMode = "bredr";
-  #    };
-  #  };
+    #  powerOnBoot = false;
+    #  settings = {
+    #    General = {
+    #      Enable = "Source,Sink,Media,Socket"; # A2DP
+    #      ControllerMode = "bredr";
+    #    };
+    #  };
   };
   #services.blueman.enable = true;
 
@@ -85,7 +85,7 @@
   nixpkgs.config.android_sdk.accept_license = true;
 
   # GnuPG
-  programs.mtr.enable = true;  
+  programs.mtr.enable = true;
   programs.gnupg.agent = {
     enable = true;
     enableSSHSupport = true;
@@ -94,6 +94,8 @@
   # System-wide packages.
   environment.systemPackages = with pkgs; [
     neovim
+    tree-sitter
+    nixpkgs-fmt
     git
     wget
     iptables
@@ -118,26 +120,26 @@
   # system.copySystemConfiguration = true;
 
   # This option defines the first version of NixOS you have installed on
-	# this particular machine, and is used to maintain compatibility with
-	# application data (e.g. databases) created on older NixOS versions.
+  # this particular machine, and is used to maintain compatibility with
+  # application data (e.g. databases) created on older NixOS versions.
   #
   # Most users should NEVER change this value after the initial install,
-	# for any reason, even if you've upgraded your system to a new NixOS
-	# release.
+  # for any reason, even if you've upgraded your system to a new NixOS
+  # release.
   #
   # This value does NOT affect the Nixpkgs version your packages and OS
-	# are pulled from, so changing it will NOT upgrade your system - see
-	# https://nixos.org/manual/nixos/stable/#sec-upgrading for how to
-	# actually do that.
+  # are pulled from, so changing it will NOT upgrade your system - see
+  # https://nixos.org/manual/nixos/stable/#sec-upgrading for how to
+  # actually do that.
   #
   # This value being lower than the current NixOS release does NOT mean
-	# your system is out of date, out of support, or vulnerable.
+  # your system is out of date, out of support, or vulnerable.
   #
   # Do NOT change this value unless you have manually inspected all the
-	# changes it would make to your configuration, and migrated your data
-	# accordingly.
+  # changes it would make to your configuration, and migrated your data
+  # accordingly.
   #
   # For more information, see `man configuration.nix` or
-	# https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion.
+  # https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion.
   system.stateVersion = "25.05"; # Did you read the comment?
 }

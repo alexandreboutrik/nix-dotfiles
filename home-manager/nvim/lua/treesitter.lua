@@ -13,28 +13,33 @@ end
 
 vim.opt.rtp:prepend(install_path)
 
-local ok, configs_or_err = pcall(require, "nvim-treesitter.configs")
+local ok, ts = pcall(require, "nvim-treesitter")
 
 if not ok then
 	vim.notify("Tree-sitter failed to load. Reason:\n" .. tostring(configs_or_err), vim.log.levels.ERROR)
 	return
 end
 
-configs_or_err.setup({
-	ensure_installed = { 
-		"c", "lua", "vim", "vimdoc", "query", 
-		"haskell", "python", "rust", "go", "bash", "java",
-		"markdown", "markdown_inline"
-	},
-	
-	auto_install = true, 
+ts.install({ 
+	"c", "lua", "vim", "vimdoc", "query", 
+	"haskell", "python", "rust", "go", "bash", "java",
+	"markdown", "markdown_inline"
+}, { summary = false })
 
-	highlight = {
-		enable = true,
-		disable = { "coq" },
-		additional_vim_regex_highlighting = { "c", "cpp" },
-	},
-	indent = {
-		enable = true,
-	},
+vim.api.nvim_create_autocmd("FileType", {
+	callback = function(event)
+		-- Replaces `disable = { "coq" }`
+		if event.match == "coq" then 
+			return 
+		end
+		
+		-- Replaces `auto_install = true`
+		pcall(ts.install, { event.match }, { summary = false })
+		
+		-- Replaces `highlight = { enable = true }` with Neovim's native engine
+		pcall(vim.treesitter.start, event.buf)
+		
+		-- Replaces `indent = { enable = true }`
+		vim.bo[event.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+	end,
 })
