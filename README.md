@@ -22,7 +22,7 @@ sudo nixos-rebuild switch --flake .#d5424
 The graphical desktop is built around Wayland.
 
 | Component | Software |
-|:---------:|:---------|
+|:----------|:---------|
 | Booloader | `systemd-boot` |
 | Libc/toolchain | `glibc`, `llvm/clang` |
 | Filesystem | `ext4` |
