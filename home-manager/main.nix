@@ -30,7 +30,7 @@ in
 
 			# Desktop apps
 			alacritty firefox telegram-desktop
-			libreoffice-fresh
+			libreoffice-stable
 			texstudio texlive.combined.scheme-full
 			typst tinymist
 			marktext
@@ -57,7 +57,7 @@ in
 
 			# Formal Verification
 			why3 alt-ergo z3 cvc5
-			framac compcert
+			frama-c compcert
 			jasmin-compiler easycrypt
 
 			# Mobile

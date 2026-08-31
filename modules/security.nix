@@ -37,6 +37,8 @@
     "kernel.randomize_va_space" = 2; # KASLR.
     "kernel.sysrq" = 0; # Disables sysqr key.
     "kernel.unprivileged_bpf_disabled" = 1;
+		"kernel.kexec_load_disabled" = 1; # kexec.
+		"dev.tty.ldisc_autoload" = 0; # TIOCSTI injection attacks.
     #"kernel.unprivileged_userns_clone" = 1;
     #"kernel.yama.ptrace_scope" = 3; # Disables ptrace. 
     #"kernel.perf_event_paranoid" = 3;
@@ -56,39 +58,59 @@
     # Prevents merging similar memory slabs.
     # Hardens against heap attacks.
     "slab_nomerge"
+
     # Frees memory with a poison value (0xAA).
     # Catches Use-after-Free (UaF) early.
     # CONFIG_PAGE_POISONING takes precedence over init_on_alloc and init_on_free.
-    "page_poison=1"
+    #"page_poison=1"
+
     # Zero-fills memory when allocated.
     # Defeats Use-after-Free (UaF) leaks.
-    #"init_on_alloc=1"
+    "init_on_alloc=1"
+
     # Zero-fills memory when freed.
     # Reduces sensitive data remnants.
-    #"init_on_free=1"
+    "init_on_free=1"
+
     # Randomizes page allocation.
     # Mitigates memory layout guessing.
     "page_alloc.shuffle=1"
 
+		# Since v6.17, force exposed pointers to be hashed.
+		"hash_pointers=always"
+
     # Enables Page Table Isolation (PTI).
     # Mitigates Meltdown.
     "pti=on"
+
     # Enable Spectre v2 mitigations.
     # Blocks speculative execution attacks.
     "spectre_v2=on"
+
     # Disables speculative store bypass (Spectre v4).
     # Mitigates another Spectre variant.
     "spec_store_bypass_disable=on"
+
     # Prevents huge-page side-channel attacks in VMs.
     # Hardens KVM Hypervisor.
     "kvm.nx_huge_pages=force"
 
     # Disables obsolete vsyscall.
+		# Remove vsyscall entirely to avoid it being a fixed-position ROP
+		# target of any kind.
     "vsyscall=none"
+		
+		# Make sure COMPAT_VDSO stays disabled
+		"vdso32=0"
+
     # Disables Hyper-Threading. Kills Spectre/MDS/TAA.
-    #nosmt=force
+    #"nosmt=force"
+
+		# Disable FineIBT since it is weaker than pure KCFI.
+		"cfi=kcfi"
+
     # Disables Intel TSX (fixes TAA).
-    #tsx=off
+    #"tsx=off"
   ];
 
   # Cloudlfare DNS.
