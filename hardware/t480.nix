@@ -5,7 +5,8 @@
 
 {
   imports =
-    [ (modulesPath + "/installer/scan/not-detected.nix")
+    [
+      (modulesPath + "/installer/scan/not-detected.nix")
     ];
 
   boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "usb_storage" "sd_mod" "sr_mod" ];
@@ -14,28 +15,30 @@
   boot.extraModulePackages = [ ];
 
   fileSystems."/" =
-    { device = "/dev/disk/by-label/nix-root";
+    {
+      device = "/dev/disk/by-label/nix-root";
       fsType = "ext4";
     };
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-label/nix-boot";
+    {
+      device = "/dev/disk/by-label/nix-boot";
       fsType = "vfat";
       options = [ "fmask=0022" "dmask=0022" ];
     };
 
   fileSystems."/home" =
-    { device = "/dev/disk/by-label/nix-home";
+    {
+      device = "/dev/disk/by-label/nix-home";
       fsType = "ext4";
     };
 
   swapDevices =
-    [ { device = "/dev/disk/by-label/nix-swap"; }
-    ];
+    [{ device = "/dev/disk/by-label/nix-swap"; }];
 
-	# Basic networking configuration
+  # Basic networking configuration
   networking.useDHCP = lib.mkDefault true;
-	networking.hostName = "t480";
+  networking.hostName = "t480";
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;

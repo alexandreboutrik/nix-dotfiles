@@ -37,8 +37,8 @@
     "kernel.randomize_va_space" = 2; # KASLR.
     "kernel.sysrq" = 0; # Disables sysqr key.
     "kernel.unprivileged_bpf_disabled" = 1;
-		"kernel.kexec_load_disabled" = 1; # kexec.
-		"dev.tty.ldisc_autoload" = 0; # TIOCSTI injection attacks.
+    "kernel.kexec_load_disabled" = 1; # kexec.
+    "dev.tty.ldisc_autoload" = 0; # TIOCSTI injection attacks.
     #"kernel.unprivileged_userns_clone" = 1;
     #"kernel.yama.ptrace_scope" = 3; # Disables ptrace. 
     #"kernel.perf_event_paranoid" = 3;
@@ -76,8 +76,8 @@
     # Mitigates memory layout guessing.
     "page_alloc.shuffle=1"
 
-		# Since v6.17, force exposed pointers to be hashed.
-		"hash_pointers=always"
+    # Since v6.17, force exposed pointers to be hashed.
+    "hash_pointers=always"
 
     # Enables Page Table Isolation (PTI).
     # Mitigates Meltdown.
@@ -96,18 +96,18 @@
     "kvm.nx_huge_pages=force"
 
     # Disables obsolete vsyscall.
-		# Remove vsyscall entirely to avoid it being a fixed-position ROP
-		# target of any kind.
+    # Remove vsyscall entirely to avoid it being a fixed-position ROP
+    # target of any kind.
     "vsyscall=none"
-		
-		# Make sure COMPAT_VDSO stays disabled
-		"vdso32=0"
+
+    # Make sure COMPAT_VDSO stays disabled
+    "vdso32=0"
 
     # Disables Hyper-Threading. Kills Spectre/MDS/TAA.
     #"nosmt=force"
 
-		# Disable FineIBT since it is weaker than pure KCFI.
-		"cfi=kcfi"
+    # Disable FineIBT since it is weaker than pure KCFI.
+    "cfi=kcfi"
 
     # Disables Intel TSX (fixes TAA).
     #"tsx=off"
