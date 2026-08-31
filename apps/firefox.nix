@@ -292,12 +292,12 @@ in
 				# PREF: Don't use document specified fonts to prevent installed font enumeration (fingerprinting)
 				# https://github.com/pyllyukko/user.js/issues/395
 				# https://github.com/pyllyukko/user.js/issues/120
-				"browser.display.use_document_fonts".Value = 0;
+				# NOTICE: Breaks Gemini UI interface
+				#"browser.display.use_document_fonts".Value = 0;
 
 				# PREF: Always block media autoplay
 				# https://support.mozilla.org/en-US/kb/block-autoplay
 				"media.autoplay.default".Value = 5;
-
 
 				# ==================== #
 				# Extensions / plugins #
