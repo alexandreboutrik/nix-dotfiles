@@ -37,6 +37,10 @@ in
         Fingerprinting = true;
       };
 
+      SearchEngines = {
+        Default = "DuckDuckGo";
+      };
+
       # Heavily based on pollyuko's relaxed user.js.
       # https://github.com/pyllyukko/user.js
       Preferences = {
@@ -226,7 +230,7 @@ in
 
         # PREF: Do not submit invalid URIs entered in the address bar to the default search engine
         # http://kb.mozillazine.org/Keyword.enabled
-        "keyword.enabled" = lock-false;
+        #"keyword.enabled" = lock-false;
 
         # PREF: Don't trim HTTP off of URLs in the address bar.
         # https://bugzilla.mozilla.org/show_bug.cgi?id=665580
