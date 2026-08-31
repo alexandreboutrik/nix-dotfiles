@@ -36,9 +36,18 @@
   swapDevices =
     [{ device = "/dev/disk/by-label/nix-swap"; }];
 
-  # Basic networking configuration
+  # Ba/sic networking configuration
   networking.useDHCP = lib.mkDefault true;
   networking.hostName = "t480";
+
+  services.xserver.xkb = {
+    layout = "br";
+    variant = "thinkpad";
+  };
+
+  console = {
+    keyMap = lib.mkForce "br-abnt2";
+  };
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
