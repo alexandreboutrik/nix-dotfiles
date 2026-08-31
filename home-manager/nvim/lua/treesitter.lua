@@ -32,14 +32,34 @@ vim.api.nvim_create_autocmd("FileType", {
 		if event.match == "coq" then 
 			return 
 		end
+
+		-- Map 'sh' filetype to 'bash' parser
+		local lang = event.match
+		if lang == "sh" then
+			lang = "bash"
+		end
+
+		-- Load the parsers module here so the variable is defined
+		local parsers = require("nvim-treesitter.parsers")
+
+		-- Compat: Check if the language is supported using both APIs
+		local is_supported = false
+		if type(parsers.get_parser_configs) == "function" then
+			is_supported = parsers.get_parser_configs()[lang] ~= nil
+		else
+			is_supported = parsers[lang] ~= nil
+		end
 		
-		-- Replaces `auto_install = true`
-		pcall(ts.install, { event.match }, { summary = false })
-		
-		-- Replaces `highlight = { enable = true }` with Neovim's native engine
-		pcall(vim.treesitter.start, event.buf)
-		
-		-- Replaces `indent = { enable = true }`
-		vim.bo[event.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+		-- Only attempt installation and highlighting if a parser actually exists
+		if is_supported then
+			-- Replaces `auto_install = true`
+			pcall(ts.install, { lang }, { summary = false })
+			
+			-- Replaces `highlight = { enable = true }` with Neovim's native engine
+			pcall(vim.treesitter.start, event.buf)
+			
+			-- Replaces `indent = { enable = true }`
+			vim.bo[event.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+		end
 	end,
 })
