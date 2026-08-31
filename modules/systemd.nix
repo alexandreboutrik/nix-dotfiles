@@ -13,6 +13,15 @@
       NoNewPrivileges = true;
       IPAddressDeny = "any";
       Umask = "0077";
+			ProtectHostname = true;
+      ProtectKernelLogs = true;
+      ProtectKernelModules = true;
+      MemoryDenyWriteExecute = true;
+      RestrictRealtime = true;
+      RestrictSUIDSGID = true;
+      RestrictNamespaces = true;
+      PrivateUsers = true;
+      SystemCallArchitectures = "native";
     };
   };
 
@@ -31,8 +40,10 @@
       MemoryDenyWriteExecute = true;
       NoNewPrivileges = true;
       RestrictSUIDSGID = true;
-      RestructNamespaces = true;
+      RestrictNamespaces = true;
       Umask = "0077";
+			RestrictRealtime = true;
+      SystemCallArchitectures = "native";
     };
   };
 
@@ -51,6 +62,20 @@
       ProcSubset = "pid";
       RestrictNamespaces = true;
       Umask = "0077";
+			RestrictRealtime = true;
+      RestrictSUIDSGID = true;
+      SystemCallArchitectures = "native";
+    };
+  };
+
+	systemd.services.sshd = {
+    serviceConfig = {
+      ProtectKernelTunables = true;
+      ProtectKernelModules = true;
+      ProtectKernelLogs = true;
+      ProtectControlGroups = true;
+      ProtectClock = true;
+      RestrictRealtime = true;
     };
   };
 }
