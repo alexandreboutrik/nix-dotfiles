@@ -4,7 +4,7 @@
 
 `nix-dotfiles` is a reproducible, hardened, multi-host NixOS configuration built with Nix Flakes and Home Manager. It provides a lightweight Wayland tiling desktop, specialized developer environments, and kernel-to-application security hardening.
 
-# Deployment
+## Deployment
 
 ```bash
 git clone git@github.com:alexandreboutrik/nix-dotfiles.git ~/nix-dotfiles
@@ -17,7 +17,7 @@ sudo nixos-rebuild switch --flake .#t480
 sudo nixos-rebuild switch --flake .#d5424
 ```
 
-# Desktop Environment
+## Desktop Environment
 
 The graphical desktop is built around Wayland.
 
@@ -34,7 +34,7 @@ The graphical desktop is built around Wayland.
 | Terminal | `alacritty` with `bash` |
 | Editor | native `nvim` |
 
-# Security & System Hardening
+## Security & System Hardening
 
 **Full Disk Encryption**. Partitions are fully encrypted using LUKS (`/dev/disk/by-label/nix-encrypted`) and unlocked during the `initrd` stage before LVM activation.
 
@@ -50,12 +50,12 @@ The graphical desktop is built around Wayland.
 
 **FireFox user.js**. Firefox is locked down through declarative Nix policies and a strict `user.js` adapted from [pyllyukko's user.js](https://github.com/pyllyukko/user.js).
 
-# Considerations & Exclusions
+## Considerations & Exclusions
 
 **Plausible Deniability**. Because these laptops are highly mobile (used for university and travel), plausible deniability within the LUKS storage setup is currently under consideration to further protect against coerced decryption, though it is not yet implemented.
 
 **`uutils/coreutils`**. While the system aim to replace traditional C utilities with memory-safe Rust alternatives such as `sudo-rs`, replacing GNU coreutils with `uutils` is NOT under consideration. The `uutils` project remains too imature and not production-ready for a daily driver system, presenting a risk of breaking standard shell scripts and established system expectations.
 
-# LICENSE
+## LICENSE
 
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT). Feel free to use, modify, and distribute the code as needed. See the [LICENSE](LICENSE) file for more information.
