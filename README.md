@@ -26,7 +26,7 @@ The graphical desktop is built around Wayland.
 | Booloader | `systemd-boot` |
 | Libc/toolchain | `glibc`, `llvm/clang` |
 | Filesystem | `ext4` |
-| Display Manager | `lightdm` |
+| Display Manager | headless tty1 autostart, `lockme` |
 | Window Manager | `hyprland` with `XWayland` support |
 | Status Bar | `waybar` |
 | Application Launcher | `wofi` |
@@ -42,11 +42,13 @@ The graphical desktop is built around Wayland.
 
 **Sysctl Hardening**. The kernel runtime is locked down by disabling unprivileged BPF, preventing kexec usage, enforcing aggressive KASLR, and completely hiding kernel pointers from user space. At the network layer, the stack mitigates attacks by enabling TCP SYN cookies, RFC 1337 TIME-WAIT protection, and reverse path filtering, while actively ignoring ICMP broadcast requests, ICMP redirects, and source routing attempts.
 
-**Boot Parameters**. The kernel is initialized with boot parameters designed to defeat memory corruption and hardware vulnerabilities. These parameters disable slab merging, enforce zero-filled memory allocations upon creation and deletion, and mandate Kernel Control Flow Integrity. Furthermore, hardware-level mitigations for speculative execution flaws like Spectre, Meltdown, and TAA are enforced.
+**Boot Parameters**. The kernel is initialized with boot parameters designed to defeat memory corruption and hardware vulnerabilities. These parameters disable slab merging, enforce zero-filled memory allocations upon creation and deletion, mandate Kernel Control Flow Integrity, and more. Furthermore, hardware-level mitigations for speculative execution flaws like Spectre, Meltdown, and TAA are also enforced.
 
 **Systemd Directives**. `systemd-rfkill`, `NetworkManager` and `sshd` are constrained/sandboxed to limit their blast radius in the event of an exploit. These constraints utilize strict systemd directives like restricted namespaces, denied write-execute memory mappings, protected home directories, and native syscall architecture filters to prevent compromised daemons from escalating privileges across the wider system.
 
-**NetFilter IPTables**. The default NixOS firewall is replaced by a custom, declarative `iptables` service that enforces a strict drop policy for all unsolicited input, output, and forward traffic. The ruleset manages secure bridge routing for Incus virtualization, filters spoofed subnets on external interfaces, drops ping requests, and actively intercepts and logs TCP flag port scans such as NULL, XMAS, and SYN/RST patterns.
+**NetFilter NFTables**. The default NixOS firewall is replaced by a custom, declarative `nftables` service that enforces a strict drop policy for all unsolicited input, output, and forward traffic. The ruleset manages secure bridge routing for Incus virtualization, filters spoofed subnets on external interfaces, drops ping requests, and actively intercepts and logs TCP flag port scans such as NULL, XMAS, and SYN/RST patterns.
+
+**Screen Locker**. The `lockme` screen locker provides privilege separation by forking a PAM auth child over a length-prefixed pipe. Transient password material is protected in a page-aligned buffer rounded up to a page multiple, secured with `mlock` and `MADV_DONTDUMP`, and cleared using `explicit_bzero`. The locker process is further hardened by dropping dumpability, denying new privileges, and suppressing core dumps.
 
 **FireFox user.js**. Firefox is locked down through declarative Nix policies and a strict `user.js` adapted from [pyllyukko's user.js](https://github.com/pyllyukko/user.js).
 
