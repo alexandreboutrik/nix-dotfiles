@@ -10,7 +10,7 @@ export NIX_DOTFILES="${HOME}/nix-dotfiles"
 
 alias n-update="time { nix flake update --flake ${NIX_DOTFILES} ; }"
 alias n-clean="time { sudo nix-collect-garbage -d && nix-collect-garbage -d ; }"
-alias n-optimize="time { sudo nix store --optimise && nix store --optimise ; }"
+alias n-optimise="time { sudo nix-store --optimise ; }"
 
 function n-rebuild() {
 	time {
