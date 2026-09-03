@@ -20,12 +20,8 @@
     };
   };
 
-  services = {
-    xserver = {
-      enable = true;
-      displayManager.lightdm.enable = true;
-    };
-  };
+  # Disable Xserver. The TWM is executed by Bashrc.
+  services.xserver.enable = false;
 
   # Enable sound. Use Pulseaudio only (no Pipewire).
   services.pulseaudio.enable = true;

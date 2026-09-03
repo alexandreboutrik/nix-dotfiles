@@ -266,6 +266,12 @@
   # Randomize MAC Address.
   networking.networkmanager.wifi.macAddress = "random";
 
+  # Lockme.
+  security.pam.services.lockme = { };
+  environment.systemPackages = [
+    (pkgs.callPackage ../apps/lockme.nix { })
+  ];
+
   # Use sudo-rs instead of sudo.
   security.sudo.enable = false;
   security.sudo-rs = {

@@ -38,6 +38,7 @@ in
       mupdf
       qpdf
       feh
+      swayimg
       hyperfine
       dig
       nmap
@@ -59,7 +60,7 @@ in
       telegram-desktop
       libreoffice-stable
       texstudio
-      texlive.combined.scheme-full
+      texliveFull
       typst
       tinymist
       marktext
@@ -138,8 +139,9 @@ in
       "nvim" = forceDir ./nvim;
     };
 
-    home.file = {
-      ".bashrc" = forceDir ./bashrc;
+    programs.bash = {
+      enable = true;
+      initExtra = builtins.readFile ./bashrc;
     };
 
     gtk = {

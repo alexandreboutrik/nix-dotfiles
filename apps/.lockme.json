@@ -1,0 +1,52 @@
+{
+  "depends": [
+    {
+      "method": "fetchzip",
+      "path": "/nix/store/5xqj36z4dhjsq42fx81nrpbq96v24c58-source",
+      "rev": "4755e537a848e5f91465ccb314013fc0a7ce7c2f",
+      "sha256": "00ig2rhk82z6c00vcpk4gh4m6bq1wmyqm2yfwfgyg9465p83gs7a",
+      "url": "https://github.com/greenm01/nimkdl/archive/4755e537a848e5f91465ccb314013fc0a7ce7c2f.tar.gz",
+      "ref": "v2.1.0^{}",
+      "packages": [
+        "nimkdl"
+      ],
+      "srcDir": "src"
+    },
+    {
+      "method": "fetchzip",
+      "path": "/nix/store/c5jkv3mb0mzij9sxhw2n0aylja58mbxb-source",
+      "rev": "c5ea3d5c95b7b3c95d980ca8ea608c06ae537762",
+      "sha256": "17gn8iarzi6v0pqhrgi832cv5w03s8pphz59d3bmqq955mfdgi6c",
+      "url": "https://github.com/nim-lang/bigints/archive/c5ea3d5c95b7b3c95d980ca8ea608c06ae537762.tar.gz",
+      "ref": "0.5.0",
+      "packages": [
+        "bigints"
+      ],
+      "srcDir": "src"
+    },
+    {
+      "method": "fetchzip",
+      "path": "/nix/store/msxy43q0k2gfivhghwwnsr3a84kbghrb-source",
+      "rev": "b4c6cd5b7be73b041e7f7aea08417a54733c3e6e",
+      "sha256": "09zk3zgkf08zdn4inq47h3mvy6ggyqbyw1fcn7pifaf2ih9adfyr",
+      "url": "https://github.com/nitely/nim-graphemes/archive/b4c6cd5b7be73b041e7f7aea08417a54733c3e6e.tar.gz",
+      "ref": "v0.8.0",
+      "packages": [
+        "graphemes"
+      ],
+      "srcDir": "src"
+    },
+    {
+      "method": "fetchzip",
+      "path": "/nix/store/1mcck56sr1h1sf8gv87m761x6f3d1k0l-source",
+      "rev": "7c6ee4bfc184d7121896a098d68b639a96df7af1",
+      "sha256": "06j8d0bjbpv1iibqlmrac4qb61ggv17hvh6nv4pbccqk1rlpxhsq",
+      "url": "https://github.com/nitely/nim-unicodedb/archive/7c6ee4bfc184d7121896a098d68b639a96df7af1.tar.gz",
+      "ref": "v0.9.0",
+      "packages": [
+        "unicodedb"
+      ],
+      "srcDir": "src"
+    }
+  ]
+}

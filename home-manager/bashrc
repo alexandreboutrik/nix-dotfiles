@@ -82,3 +82,7 @@ function killbyname() {
 		echo $pid | xargs kill -${1:-9}
 	fi
 }
+
+if [ "$(tty)" = "/dev/tty1" ]; then
+	exec start-hyprland
+fi

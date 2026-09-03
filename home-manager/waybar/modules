@@ -126,7 +126,7 @@
 
   "custom/lock": {
     "format": "󰌾",
-    "on-click": "dm-tool lock",
+    "on-click": "lockme --no-gpu --idle-timeout 30 --blank",
     "tooltip": true,
     "tooltip-format": "󰌾 Screen Lock"
   },
