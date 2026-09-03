@@ -1,8 +1,84 @@
 export PATH="${PATH}:${HOME}/.local/bin:${HOME}/.npm-global/bin"
-
-alias nixupgrade="nix-channel --update && nixos-rebuild switch --upgrade"
-
 export PS1="\n\[\033[1;32m\]  [\u]  [\w] \$ \[\033[0m\]"
 
 mkdir -p ~/.npm-global
 npm config set prefix '~/.npm-global'
+
+# Nix-related
+
+export NIX_DOTFILES="${HOME}/nix-dotfiles"
+
+alias n-update="time { nix flake update --flake ${NIX_DOTFILES} ; }"
+alias n-clean="time { sudo nix-collect-garbage -d && nix-collect-garbage -d ; }"
+alias n-optimize="time { sudo nix store --optimise && nix store --optimise ; }"
+
+function n-rebuild() {
+	time {
+		sudo nixos-rebuild switch --flake ${NIX_DOTFILES}#${1}
+	}
+}
+
+# Utility functions
+
+function extract() {
+	if [[ -f $1 ]]; then
+		case "$1" in
+		*.tar.bz2) tar xvjf "$1" ;;
+		*.tar.gz) tar xvzf "$1" ;;
+		*.tar.xz) tar xvf "$1" ;;
+		*.tar) tar xvf "$1" ;;
+		*.tgz) tar xvf "$1" ;;
+		*.xz) tar xvf "$1" ;;
+		*.gz) gunzip "$1" ;;
+		*.zip) unzip "$1" ;;
+		*.rar) unrar x "$1" ;;
+		*.bz2) bzip2 -d "$1" ;;
+		*.lzma) unlzma "$1" ;;
+		*.Z) uncompress "$1" ;;
+		*.7z) 7z x "$1" ;;
+		*.deb) ar x ./"$1" ;;
+		*) echo "'$1' cannot be extracted via extract." ;;
+		esac
+	else
+		echo "'$1' is not a valid file"
+	fi
+}
+
+function compress() {
+	if [[ -n "$1" ]]; then
+		FILE=$1
+		case $FILE in
+		*.tar) shift && tar cf $FILE $* ;;
+		*.tar.bz2) shift && tar cjf $FILE $* ;;
+		*.tar.xz) shift && tar cjf $FILE $* ;;
+		*.tar.gz) shift && tar czf $FILE $* ;;
+		*.tgz) shift && tar czf $FILE $* ;;
+		*.zip) shift && zip -r $FILE $* ;;
+		*.rar) shift && rar $FILE $* ;;
+		esac
+	else
+		echo "usage: compress <foo.tar.gz> ./foo ./bar"
+	fi
+}
+
+function fsize() {
+	if du -b /dev/null >/dev/null 2>&1; then
+		local arg=-sbh
+	else
+		local arg=-sh
+	fi
+	if [[ -n "$@" ]]; then
+		du $arg -- "$@"
+	else
+		du $arg .[^.]* ./*
+	fi
+}
+
+function killbyname() {
+	local pid
+	pid=$(ps -ef | sed 1d | fzf -m | awk '{print $2}')
+
+	if [ "x$pid" != "x" ]; then
+		echo $pid | xargs kill -${1:-9}
+	fi
+}
