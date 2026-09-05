@@ -50,11 +50,13 @@ The graphical desktop is built around Wayland.
 
 **Screen Locker**. The `lockme` screen locker provides privilege separation by forking a PAM auth child over a length-prefixed pipe. Transient password material is protected in a page-aligned buffer rounded up to a page multiple, secured with `mlock` and `MADV_DONTDUMP`, and cleared using `explicit_bzero`. The locker process is further hardened by dropping dumpability, denying new privileges, and suppressing core dumps.
 
-**FireFox user.js**. Firefox is locked down through declarative Nix policies and a strict `user.js` adapted from [pyllyukko's user.js](https://github.com/pyllyukko/user.js).
+**Firefox Browser**. Firefox is deployed as a Flatpak and isolated using declarative Flatseal overrides. Then, Firefox is further locked down through declarative Nix policies and a strict `user.js` adapted from [pyllyukko's user.js](https://github.com/pyllyukko/user.js).
 
 ## Considerations & Exclusions
 
 **Plausible Deniability**. Because these laptops are highly mobile (used for university and travel), plausible deniability within the LUKS storage setup is currently under consideration to further protect against coerced decryption, though it is not yet implemented.
+
+**Hardened Memory Allocators**. Integrating hardened memory allocators like Scudo or Graphene-hardened into a dedicated, per-package sandboxing layer (such as Flatpak) is currently under consideration.
 
 **`uutils/coreutils`**. While the system aim to replace traditional C utilities with memory-safe Rust alternatives such as `sudo-rs`, replacing GNU coreutils with `uutils` is NOT under consideration. The `uutils` project remains too imature and not production-ready for a daily driver system, presenting a risk of breaking standard shell scripts and established system expectations.
 
