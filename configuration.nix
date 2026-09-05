@@ -90,6 +90,7 @@
   # System-wide packages.
   environment.systemPackages = with pkgs; [
     neovim
+    (pkgs.callPackage ./system-apps/vim.nix { })
     tree-sitter
     nixpkgs-fmt
     git

@@ -269,7 +269,7 @@
   # Lockme.
   security.pam.services.lockme = { };
   environment.systemPackages = [
-    (pkgs.callPackage ../apps/lockme.nix { })
+    (pkgs.callPackage ../system-apps/lockme.nix { })
   ];
 
   # Use sudo-rs instead of sudo.
