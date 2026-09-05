@@ -12,10 +12,17 @@ let
   };
 in
 {
-  programs.firefox = {
-    enable = true;
-    languagePacks = [ "en-US" ];
+  home.packages = [
+    (pkgs.writeShellScriptBin "firefox" ''
+      exec flatpak run org.mozilla.firefox "$@"
+    '')
+  ];
 
+  xdg.dataFile."flatpak/overrides/org.mozilla.firefox".text = (builtins.readFile ./flatseal.toml);
+
+  home.activation.migrateFirefoxProfile = lib.hm.dag.entryAfter [ "writeBoundary" ] (builtins.readFile ./migrate-firefox.sh);
+
+  home.file.".var/app/org.mozilla.firefox/.mozilla/firefox/distribution/policies.json".text = builtins.toJSON {
     policies = {
       AppAutoUpdate = false;
       DontCheckDefaultBrowser = true;
@@ -755,5 +762,5 @@ in
         "security.tls.enable_kyber" = lock-true;
       }; # Preferences
     }; # policies
-  }; # programs.firefox
+  }; # builtins.toJSON
 }

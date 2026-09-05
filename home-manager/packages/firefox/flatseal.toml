@@ -1,0 +1,19 @@
+[Context]
+# Revoke default home/host access
+filesystems=!home!;host;~/Téléchargements;~/Downloads;~/Screenshots
+
+# Enforce Wayland; drop X11, printing (cups), and smartcards (pcsc)
+sockets=wayland;!x11;!fallback-x11;!cups;!pcsc
+
+# Revoke raw device access, allow only GPU acceleration (dri)
+devices=!all;dri
+
+# Restrict D-Bus: allow notifications, video wake-locks, media keys,
+# portals
+session-bus-talk=!*;org.freedesktop.Notifications;org.freedesktop.ScreenSaver;org.mpris.MediaPlayer2.firefox;org.freedesktop.portal.*
+
+[Environment]
+# Replicate the NixOS Wayland session variable inside the sandbox
+MOZ_ENABLE_WAYLAND=1
+# Disable Firefox installation hash checks to force profile adoption
+MOZ_LEGACY_PROFILES=1

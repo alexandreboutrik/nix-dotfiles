@@ -20,6 +20,8 @@ in
       ./packages/academic.nix
       ./packages/security.nix
       ./packages/verification.nix
+
+      ./packages/firefox/firefox.nix
     ];
 
     home.stateVersion = "25.05";

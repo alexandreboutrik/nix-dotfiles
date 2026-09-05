@@ -13,8 +13,7 @@
       ./modules/virtualisation.nix # vms, containers and sandboxes.
       ./modules/desktop.nix # wm, audio, fonts, input, themes.
       ./modules/users.nix # accounts and groups.
-      ./apps/firefox.nix # firefox policies.json/user.js.
-      ./home-manager/main.nix # home dotfiles.
+      ./home-manager/main.nix # home dotfiles and packages.
     ];
 
   nixpkgs.config.allowUnfree = true;
@@ -77,9 +76,6 @@
 
   # BIOS/UEFI firmware
   services.fwupd.enable = true;
-
-  # Firejail
-  programs.firejail.enable = true;
 
   # Mobile
   nixpkgs.config.android_sdk.accept_license = true;

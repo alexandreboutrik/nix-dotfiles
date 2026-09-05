@@ -1,6 +1,19 @@
 { config, lib, pkgs, ... }:
 
 {
+  # Flatpak
+  services.flatpak = {
+    enable = true;
+    remotes = lib.mkOptionDefault [{
+      name = "flathub";
+      location = "https://dl.flathub.org/repo/flathub.flatpakrepo";
+    }];
+    packages = [
+      "org.mozilla.firefox"
+    ];
+    update.auto.enable = true;
+  };
+
   # Ollama
   #services.ollama = {
   #enable = true;

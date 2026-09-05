@@ -8,9 +8,11 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    nix-flatpak.url = "github:gmodena/nix-flatpak";
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }@inputs: {
+  outputs = { self, nixpkgs, home-manager, nix-flatpak, ... }@inputs: {
     nixosConfigurations = {
       # Dell Rugged 5424
       d5424 = nixpkgs.lib.nixosSystem {
@@ -20,6 +22,7 @@
           ./configuration.nix
           ./hardware/d5424.nix
           home-manager.nixosModules.home-manager
+          nix-flatpak.nixosModules.nix-flatpak
         ];
       };
 
@@ -31,6 +34,7 @@
           ./configuration.nix
           ./hardware/t480.nix
           home-manager.nixosModules.home-manager
+          nix-flatpak.nixosModules.nix-flatpak
         ];
       };
     };
