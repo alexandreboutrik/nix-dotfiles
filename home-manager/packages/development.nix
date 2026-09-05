@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{ config, pkgs, ... }: {
   home.packages = with pkgs; [
     # Toolchain & VCS
     git
@@ -38,7 +38,6 @@
     scala
 
     # Go
-    go
     gopls
 
     # Python
@@ -63,4 +62,14 @@
     # android-studio 
     # gradle
   ];
+
+  programs = {
+    go = {
+      enable = true;
+      env = {
+        GOBIN = "${config.home.homeDirectory}/.go/bin";
+        GOPATH = "${config.home.homeDirectory}/.go";
+      };
+    };
+  };
 }

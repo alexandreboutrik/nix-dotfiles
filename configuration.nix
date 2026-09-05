@@ -13,7 +13,8 @@
       ./modules/virtualisation.nix # vms, containers and sandboxes.
       ./modules/desktop.nix # wm, audio, fonts, input, themes.
       ./modules/users.nix # accounts and groups.
-      ./apps/firefox.nix # firefox policies.json/user.js.
+
+      ./system-apps/firefox.nix # firefox policies.json/user.js.
       ./home-manager/main.nix # home dotfiles.
     ];
 
@@ -94,6 +95,7 @@
   # System-wide packages.
   environment.systemPackages = with pkgs; [
     neovim
+    (pkgs.callPackage ./system-apps/vim.nix { })
     tree-sitter
     nixpkgs-fmt
     git
