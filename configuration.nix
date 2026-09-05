@@ -8,7 +8,7 @@
   imports =
     [
       ./modules/security.nix # security module.
-      ./modules/nftables.nix # netfilter.
+      ./modules/nftables/nftables.nix # netfilter.
       ./modules/systemd.nix # systemd services hardening.
       ./modules/virtualisation.nix # vms, containers and sandboxes.
       ./modules/desktop.nix # wm, audio, fonts, input, themes.
