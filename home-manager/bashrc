@@ -18,6 +18,19 @@ function n-rebuild() {
 	}
 }
 
+function n-audit() {
+	if [ -z "${1}" ]; then
+		echo "Usage: n-audit <host>"
+		return 1
+	fi
+
+	echo "Scanning host \"${1}\" for vulnerabilities..."
+
+	time {
+		nix run github:tiiuae/sbomnix#vulnxscan -- ${NIX_DOTFILES}#nixosConfigurations.${1}.config.system.build.toplevel
+	}
+}
+
 # Utility functions
 
 function extract() {
