@@ -21,7 +21,7 @@ table inet filter {
         ct state { established, related } accept
 
         # INCUS VMs -> Host
-        iif "incusbr0" accept
+        iifname "incusbr0" accept
 
         # Anti-spoofing on wlan0
         iif "wlan0" ip saddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 } drop
@@ -39,8 +39,8 @@ table inet filter {
         type filter hook forward priority 0; policy drop;
 
         # INCUS VMs routing to the internet
-        iif "incusbr0" accept
-        oif "incusbr0" ct state { established, related } accept
+        iifname "incusbr0" accept
+        oifname "incusbr0" ct state { established, related } accept
     }
 
     chain output {
@@ -58,7 +58,7 @@ table inet filter {
         tcp dport 53 ct state new accept
 
         # Host -> INCUS VMs
-        oif "incusbr0" accept
+        oifname "incusbr0" accept
 
         # Allow outbound ping
         icmp type echo-request accept
