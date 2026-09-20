@@ -52,9 +52,13 @@ The graphical desktop is built around Wayland.
 
 **FireFox user.js**. Firefox is locked down through declarative Nix policies and a strict `user.js` adapted from [pyllyukko's user.js](https://github.com/pyllyukko/user.js).
 
+**VPN-Isolated Browser**. A dedicated `firefox-vpn` executable was created to launch an isolated Firefox profile where network traffic is routed through a local Wireproxy SOCKS5 tunnel connected to a VPN (configured in `~/.config/wireguard/vpn.conf`).
+
 ## Considerations & Exclusions
 
 **Plausible Deniability**. Because these laptops are highly mobile (used for university and travel), plausible deniability within the LUKS storage setup is currently under consideration to further protect against coerced decryption, though it is not yet implemented.
+
+**Ephemeral Root**. Implementing an ephemeral root filesystem is under consideration. This would mount root (`/`) to `tmpfs` during boot using the `impermanence` module. It goes without saying that to maintain operational continuity across reboots, specific data - such as WiFi profiles, SSH keys, and system logs (`journald`) - would be whitelisted for persistent storage.
 
 **`uutils/coreutils`**. While the system aim to replace traditional C utilities with memory-safe Rust alternatives such as `sudo-rs`, replacing GNU coreutils with `uutils` is NOT under consideration. The `uutils` project remains too imature and not production-ready for a daily driver system, presenting a risk of breaking standard shell scripts and established system expectations.
 
