@@ -749,14 +749,6 @@ in
         # PREF: Enable X25519Kyber768Draft00 (post-quantum key exchange) [FF Nightly 2024-01-18+]
         "security.tls.enable_kyber" = lock-true;
       }; # Preferences
-
-      # Declaratively download and force-install the theme
-      ExtensionSettings = {
-        "{9b728a2e-07c0-4b7b-9ccb-a8d5a52d0263}" = {
-          install_url = "https://addons.mozilla.org/firefox/downloads/latest/matte-dark-red-theme/latest.xpi";
-          installation_mode = "force_installed";
-        };
-      };
     }; # policies
   }; # programs.firefox
 }

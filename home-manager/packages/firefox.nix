@@ -4,7 +4,7 @@
   home.packages = with pkgs; [
     wireproxy
     (pkgs.writeShellScriptBin "firefox-vpn" ''
-      exec ${pkgs.firefox}/bin/firefox -P vpn --no-remote "$@"
+      exec firefox -P vpn --no-remote "$@"
     '')
   ];
 
@@ -50,7 +50,24 @@
           "network.proxy.socks_remote_dns" = true;
           "extensions.activeThemeID" = "{9b728a2e-07c0-4b7b-9ccb-a8d5a52d0263}";
         };
-      };
+        extensions.packages = [
+          (pkgs.stdenv.mkDerivation {
+            pname = "matte-dark-red-theme";
+            version = "latest";
+
+            src = pkgs.fetchurl {
+              url = "https://addons.mozilla.org/firefox/downloads/latest/matte-dark-red-theme/latest.xpi";
+              sha256 = "sha256-mZLExAtHLq8iHnL43DSkggYf/JbCRo1ph/do/o+9KKs=";
+            };
+
+            buildCommand = ''
+              dst="$out/share/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
+              mkdir -p "$dst"
+              install -v -m644 "$src" "$dst/{9b728a2e-07c0-4b7b-9ccb-a8d5a52d0263}.xpi"
+            '';
+          })
+        ]; # extensions
+      }; # vpn
     }; # profiles
   }; # programs.firefox
 }
