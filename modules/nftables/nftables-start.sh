@@ -57,6 +57,9 @@ table inet filter {
         udp dport 53 ct state new accept
         tcp dport 53 ct state new accept
 
+				# Allow VPN WireGuard tunnel
+				udp dport 51820 ct state new accept
+
         # Host -> INCUS VMs
         oifname "incusbr0" accept
 
