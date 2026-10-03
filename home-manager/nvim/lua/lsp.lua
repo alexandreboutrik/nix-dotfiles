@@ -8,6 +8,7 @@ vim.lsp.enable({
     "rust_analyzer",	-- rust
     "bashls",					-- bash
     "hls",						-- haskell
+		"agda_ls",				-- agda
     "gopls",					-- go
 		"dafny",					-- dafny
 		"coq_lsp",				-- rocq/coq

@@ -2,10 +2,11 @@ vim.g.mapleader = " "
 
 require("options")
 
-require("dafny_syntax")
-require("coq_syntax")
-require("acsl_syntax")
-require("isabelle_syntax")
+require("syntax.dafny")
+require("syntax.coq")
+require("syntax.acsl")
+require("syntax.isabelle")
+require("syntax.agda")
 
 require("lsp")
 require("colorscheme")

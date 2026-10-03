@@ -23,7 +23,7 @@ end
 ts.install({ 
 	"c", "lua", "vim", "vimdoc", "query", 
 	"haskell", "python", "rust", "go", "bash", "java",
-	"markdown", "markdown_inline"
+	"markdown", "markdown_inline", "agda"
 }, { summary = false })
 
 vim.api.nvim_create_autocmd("FileType", {
