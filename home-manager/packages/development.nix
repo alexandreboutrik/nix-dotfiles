@@ -31,6 +31,12 @@
     haskell-language-server
     hlint
 
+    # OCaml
+    ocaml
+    ocamlformat
+    dune
+    opam
+
     # JVM
     jdk
     jdt-language-server

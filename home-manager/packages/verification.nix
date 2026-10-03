@@ -13,5 +13,10 @@
     # Jasmin
     jasmin-compiler
     easycrypt
+
+    # Agda
+    (agda.withPackages (p: [
+      p.standard-library
+    ]))
   ];
 }
