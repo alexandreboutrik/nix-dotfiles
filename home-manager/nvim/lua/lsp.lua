@@ -12,7 +12,6 @@ vim.lsp.enable({
     "gopls",					-- go
 		"dafny",					-- dafny
 		"coq_lsp",				-- rocq/coq
-		"isabelle",				-- isabelle/hol
 		"tinymist"				-- typst
 })
 vim.diagnostic.config({ virtual_text = true })
