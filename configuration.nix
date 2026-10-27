@@ -25,7 +25,6 @@
     luks.devices = {
       luksCrypted = {
         device = "/dev/disk/by-label/nix-encrypted";
-        preLVM = true; # unlock before activating LVM.
         allowDiscards = true;
       };
     };
