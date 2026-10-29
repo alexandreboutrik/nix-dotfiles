@@ -7,6 +7,8 @@
     sloc
     tokei
     tree
+    jq
+    nvd
 
     # Archiving & File Operations
     unzip
