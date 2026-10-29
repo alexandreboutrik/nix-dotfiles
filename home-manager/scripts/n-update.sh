@@ -9,7 +9,7 @@
 # to upstream remotes.
 #
 # Usage:
-#   n-update [HOST] [-y|--yes] [-c|--commit] [-p|--push]
+#   n-update [HOST] [-y|--yes] [-c|--commit] [-p|--push] [-h|--help]
 #
 # Options:
 #   -y, --yes     Bypass manual confirmation prompt; authenticate sudo
@@ -18,44 +18,115 @@
 #   -p, --push    Tag incremental release (vX.YY) and push main branch and
 #                 tags. (Implicitly enables -c; prompts for SSH
 #                 authentication upfront).
+#   -h, --help		Display help message and exit.
 #
 # Dependencies:
 #   nix, git, jq, nvd, sudo, ssh-add
 
 set -euo pipefail
 
-main() {
-	# --------------------------
-	# Formatting & Diagnostics
-	# --------------------------
-	local RED='\033[0;31m'
-	local GREEN='\033[1;32m'
-	local YELLOW='\033[1;33m'
-	local NC='\033[0m'
+# --------------------------
+# Formatting & Diagnostics
+# --------------------------
+RED='\033[0;31m'
+GREEN='\033[1;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
 
-	subtext() {
-		printf "%b--> %s%b\n" "${YELLOW}" "${1}" "${NC}"
-	}
+subtext() {
+	printf "%b--> %s%b\n" "${YELLOW}" "${1}" "${NC}"
+}
 
-	success() {
-		printf "%b%s%b\n" "${GREEN}" "${1}" "${NC}"
-	}
+success() {
+	printf "%b%s%b\n" "${GREEN}" "${1}" "${NC}"
+}
 
-	error() {
-		printf "%bError:%b %s\n" "${RED}" "${NC}" "${1}" >&2
-	}
+error() {
+	printf "%bError:%b %s\n" "${RED}" "${NC}" "${1}" >&2
+}
 
-	local dotfiles="${NIX_DOTFILES:-"${HOME}/nix-dotfiles"}"
-	local host=""
-	local auto_yes=false
-	local auto_commit=false
-	local auto_push=false
+show_help() {
+	cat <<EOF
+Usage: n-update [HOST] [OPTIONS]
 
-	# --------------------------
-	# CLI Flag Parsing
-	# --------------------------
+Deterministic NixOS system update, audit, and release orchestrator.
+
+Arguments:
+  HOST          Target NixOS hostname (defaults to current hostname)
+
+Options:
+  -y, --yes     Bypass confirmation prompt; authenticate sudo upfront
+  -c, --commit  Commit updated flake.lock with standard chore message
+  -p, --push    Tag release (vX.YY) and push to remote (implies -c)
+  -h, --help    Display this help message and exit
+EOF
+}
+
+apply_updates() {
+	local dotfiles="$1"
+	local host="$2"
+	local do_commit="$3"
+	local do_push="$4"
+
+	# Rebuild and activate target system closure
+	if ! sudo nixos-rebuild switch --flake "${dotfiles}#${host}"; then
+		error "System activation failed. Aborting version control operations."
+		return 1
+	fi
+
+	# Automated Git lockfile commit
+	if [[ "${do_commit}" == true ]]; then
+		subtext "Creating standard lockfile synchronization commit..."
+		git -C "${dotfiles}" add flake.lock
+		git -C "${dotfiles}" commit -m "chore: update flake.lock"
+	fi
+
+	# Automated release tagging and remote push
+	if [[ "${do_push}" == true ]]; then
+		# Ensure SSH agent credentials exist if push was confirmed interactively
+		if ! ssh-add -l >/dev/null 2>&1; then
+			if ! ssh-add; then
+				error "Failed to load SSH keys into authentication agent."
+				return 1
+			fi
+		fi
+
+		local latest_tag new_tag
+		latest_tag=$(git -C "${dotfiles}" tag -l "v*" --sort=-v:refname | head -n 1)
+		if [[ -z "${latest_tag}" ]]; then
+			latest_tag=$(git -C "${dotfiles}" describe --tags --abbrev=0 2>/dev/null || true)
+		fi
+
+		if [[ -z "${latest_tag}" ]]; then
+			new_tag="v1.00"
+		elif [[ "${latest_tag}" =~ ^v?([0-9]+)\.([0-9]+)$ ]]; then
+			local major="${BASH_REMATCH[1]}"
+			local minor="${BASH_REMATCH[2]}"
+			local minor_num=$((10#${minor} + 1))
+			local pad=${#minor}
+			local new_minor
+			printf -v new_minor "%0*d" "${pad}" "${minor_num}"
+			new_tag="v${major}.${new_minor}"
+		else
+			error "Cannot parse semantic version from tag '${latest_tag}'. Expected 'vX.YY'."
+			return 1
+		fi
+
+		subtext "Publishing release tag ${new_tag} (previous: ${latest_tag:-initial})..."
+		git -C "${dotfiles}" tag "${new_tag}"
+
+		subtext "Pushing main branch and tags to upstream remote..."
+		git -C "${dotfiles}" push origin main && git -C "${dotfiles}" push origin main --tags
+	fi
+}
+
+parse_args() {
 	for arg in "$@"; do
 		case "${arg}" in
+		-h | --help)
+			show_help
+			exit 0
+			;;
 		-y | --yes)
 			auto_yes=true
 			;;
@@ -72,6 +143,10 @@ main() {
 			for ((i = 1; i < ${#arg}; i++)); do
 				local char="${arg:$i:1}"
 				case "$char" in
+				h)
+					show_help
+					exit 0
+					;;
 				y) auto_yes=true ;;
 				c) auto_commit=true ;;
 				p)
@@ -94,6 +169,16 @@ main() {
 	done
 
 	host="${host:-"$(hostname)"}"
+}
+
+main() {
+	local dotfiles="${NIX_DOTFILES:-"${HOME}/nix-dotfiles"}"
+	local host=""
+	local auto_yes=false
+	local auto_commit=false
+	local auto_push=false
+
+	parse_args "$@"
 
 	if [[ ! -d "${dotfiles}" || ! -f "${dotfiles}/flake.lock" ]]; then
 		error "Flake repository root or flake.lock not found at '${dotfiles}'."
@@ -178,54 +263,32 @@ main() {
 		success "Automatic confirmation flag active. Initiating system switch..."
 		CONFIRM="y"
 	else
-		read -rp "Promote candidate closure to active system profile? [y/N]: " CONFIRM
+		read -rp "Would you like to keep these flake updates? [y/N]: " CONFIRM
 	fi
 
 	if [[ "${CONFIRM}" =~ ^[Yy]$ ]]; then
 		success "Retaining candidate flake.lock."
 
-		# Direct rebuild execution (replaces reliance on external shell function)
-		if ! sudo nixos-rebuild switch --flake "${dotfiles}#${host}"; then
-			error "System activation failed. Aborting version control operations."
+		# Prompt for commit and push if running interactively and not
+		# passed via CLI
+		if [[ "${auto_yes}" == false && "${auto_commit}" == false ]]; then
+			local confirm_commit
+			read -rp "Commit updated flake.lock? [y/N]: " confirm_commit
+			if [[ "${confirm_commit}" =~ ^[Yy]$ ]]; then
+				auto_commit=true
+			fi
+		fi
+
+		if [[ "${auto_yes}" == false && "${auto_commit}" == true && "${auto_push}" == false ]]; then
+			local confirm_push
+			read -rp "Tag release and push to origin main? [y/N]: " confirm_push
+			if [[ "${confirm_push}" =~ ^[Yy]$ ]]; then
+				auto_push=true
+			fi
+		fi
+
+		if ! apply_updates "${dotfiles}" "${host}" "${auto_commit}" "${auto_push}"; then
 			return 1
-		fi
-
-		# --------------------------
-		# Automated Version Control Operations
-		# --------------------------
-		if [[ "${auto_commit}" == true ]]; then
-			subtext "Creating standard lockfile synchronization commit..."
-			git -C "${dotfiles}" add flake.lock
-			git -C "${dotfiles}" commit -m "chore: update flake.lock"
-		fi
-
-		if [[ "${auto_push}" == true ]]; then
-			local latest_tag new_tag
-			latest_tag=$(git -C "${dotfiles}" tag -l "v*" --sort=-v:refname | head -n 1)
-			if [[ -z "${latest_tag}" ]]; then
-				latest_tag=$(git -C "${dotfiles}" describe --tags --abbrev=0 2>/dev/null || true)
-			fi
-
-			if [[ -z "${latest_tag}" ]]; then
-				new_tag="v1.00"
-			elif [[ "${latest_tag}" =~ ^v?([0-9]+)\.([0-9]+)$ ]]; then
-				local major="${BASH_REMATCH[1]}"
-				local minor="${BASH_REMATCH[2]}"
-				local minor_num=$((10#${minor} + 1))
-				local pad=${#minor}
-				local new_minor
-				printf -v new_minor "%0*d" "${pad}" "${minor_num}"
-				new_tag="v${major}.${new_minor}"
-			else
-				error "Cannot parse semantic version from tag '${latest_tag}'. Expected 'vX.YY'."
-				return 1
-			fi
-
-			subtext "Publishing release tag ${new_tag} (previous: ${latest_tag:-initial})..."
-			git -C "${dotfiles}" tag "${new_tag}"
-
-			subtext "Pushing main branch and tags to upstream remote..."
-			git -C "${dotfiles}" push origin main && git -C "${dotfiles}" push origin main --tags
 		fi
 	else
 		subtext "Reverting lockfile modifications..."
