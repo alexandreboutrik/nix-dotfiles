@@ -32,6 +32,11 @@ in
       "nvim" = forceDir ./nvim;
     };
 
+    home.file.".local/bin/n-update" = {
+      source = ./scripts/n-update.sh;
+      executable = true;
+    };
+
     programs.bash = {
       enable = true;
       initExtra = builtins.readFile ./bashrc;

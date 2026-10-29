@@ -1,102 +1,36 @@
+# -----------------
+# Bashrc
+# -----------------
+
+# Guard clause: terminate execution immediately if shell is non-interactive
+[[ $- == *i* ]] || return
+
+# History configuration
+HISTFILESIZE=100000
+HISTSIZE=10000
+
+# Shell behavioral options
+shopt -s histappend
+shopt -s extglob
+shopt -s globstar
+shopt -s checkjobs
+
+# PATH
 export PATH="${PATH}:${HOME}/.local/bin:${HOME}/.npm-global/bin"
 export PS1="\n\[\033[1;32m\]  [\u]  [\w] \$ \[\033[0m\]"
 
+# Node Package Manager configuration
 mkdir -p ~/.npm-global
 npm config set prefix '~/.npm-global'
 
+# -----------------
 # Nix-related
+# -----------------
 
 export NIX_DOTFILES="${HOME}/nix-dotfiles"
 
 alias n-clean="time { sudo nix-collect-garbage -d && nix-collect-garbage -d ; }"
 alias n-optimise="time { sudo nix-store --optimise ; }"
-
-function n-update() {
-	local dotfiles="${NIX_DOTFILES:-"${HOME}/nix-dotfiles"}"
-	local host=""
-	local auto_yes=false
-
-	for arg in "$@"; do
-		case "${arg}" in
-		-y | --yes)
-			auto_yes=true
-			;;
-		*)
-			if [[ -z "${host}" ]]; then
-				host="${arg}"
-			fi
-			;;
-		esac
-	done
-
-	host="${host:-"$(hostname)"}"
-
-	local RED='\033[0;31m'
-	local GREEN='\033[1;32m'
-	local YELLOW='\033[1;33m'
-	local NC='\033[0m'
-
-	subtext() {
-		printf "%b--> %s%b\n" "${YELLOW}" "${1}" "${NC}"
-	}
-
-	if [[ ! -d "${dotfiles}" || ! -f "${dotfiles}/flake.lock" ]]; then
-		printf "%bError:%b Flake repository or flake.lock not found at '%s'.\n" "${RED}" "${NC}" "${dotfiles}"
-		return 1
-	fi
-
-	local OLD_NIXPKGS_REV OLD_HM_REV
-	OLD_NIXPKGS_REV=$(nix flake metadata "${dotfiles}" --json | jq -r '.locks.nodes.nixpkgs.locked.rev // empty')
-	OLD_HM_REV=$(nix flake metadata "${dotfiles}" --json | jq -r '.locks.nodes["home-manager"].locked.rev // empty')
-	subtext "Current nixpkgs commit:      ${OLD_NIXPKGS_REV:-unknown}"
-	subtext "Current home-manager commit: ${OLD_HM_REV:-unknown}"
-
-	subtext "Updating flake inputs (nixpkgs & home-manager)..."
-	nix flake update --flake "${dotfiles}"
-
-	local NEW_NIXPKGS_REV NEW_HM_REV
-	NEW_NIXPKGS_REV=$(nix flake metadata "${dotfiles}" --json | jq -r '.locks.nodes.nixpkgs.locked.rev // empty')
-	NEW_HM_REV=$(nix flake metadata "${dotfiles}" --json | jq -r '.locks.nodes["home-manager"].locked.rev // empty')
-	subtext "Target nixpkgs commit:       ${NEW_NIXPKGS_REV:-unknown}"
-	subtext "Target home-manager commit:  ${NEW_HM_REV:-unknown}"
-
-	if git -C "${dotfiles}" diff --quiet flake.lock; then
-		printf "%bNo upstream updates found.%b flake.lock is already at the latest revision.\n" "${GREEN}" "${NC}"
-		return 0
-	fi
-
-	subtext "Building closure (dry run: no activation) for host '${host}'..."
-	local OUT_LINK="/tmp/result-check"
-	rm -f "${OUT_LINK}"
-
-	if ! nix build "${dotfiles}#nixosConfigurations.${host}.config.system.build.toplevel" --out-link "${OUT_LINK}"; then
-		printf "%bBuild failed.%b Reverting lockfile changes.\n" "${RED}" "${NC}"
-		git -C "${dotfiles}" restore flake.lock
-		rm -f "${OUT_LINK}"
-		return 1
-	fi
-
-	subtext "Package version comparison (nvd)"
-	nvd diff /run/current-system "${OUT_LINK}"
-	rm -f "${OUT_LINK}"
-
-	local CONFIRM
-	if [[ "${auto_yes}" == true ]]; then
-		printf "%bAutomatic confirmation flag (-y) detected. Applying updates...%b\n" "${GREEN}" "${NC}"
-		CONFIRM="y"
-	else
-		read -rp "Would you like to keep these flake updates? [y/N]: " CONFIRM
-	fi
-
-	if [[ "${CONFIRM}" =~ ^[Yy]$ ]]; then
-		printf "%bUpdated flake.lock retained.%b\n" "${GREEN}" "${NC}"
-		n-rebuild "${host}"
-	else
-		subtext "Reverting flake.lock to previous state..."
-		git -C "${dotfiles}" restore flake.lock
-		printf "%bChanges discarded. Your system and repository are untouched.%b\n" "${GREEN}" "${NC}"
-	fi
-}
 
 function n-rebuild() {
 	time {
@@ -107,7 +41,9 @@ function n-rebuild() {
 	}
 }
 
-# Utility functions
+# -----------------
+# General Utility
+# -----------------
 
 function extract() {
 	if [[ -f $1 ]]; then
@@ -172,6 +108,7 @@ function killbyname() {
 	fi
 }
 
+# Headless TTY1 Wayland Session Autostart
 if [ "$(tty)" = "/dev/tty1" ]; then
 	exec start-hyprland
 fi
