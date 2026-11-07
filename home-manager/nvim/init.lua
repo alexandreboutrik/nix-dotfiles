@@ -7,6 +7,7 @@ require("syntax.coq")
 require("syntax.acsl")
 require("syntax.isabelle")
 require("syntax.agda")
+require("syntax.jasmin")
 
 require("lsp")
 require("colorscheme")
