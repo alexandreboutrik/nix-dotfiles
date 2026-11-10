@@ -62,7 +62,7 @@
     svelte-language-server
 
     # Misc Tools
-    sqlx-cli
+    #sqlx-cli
     shfmt
     android-tools
     # android-studio 
