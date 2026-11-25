@@ -36,9 +36,15 @@
   swapDevices =
     [{ device = "/dev/disk/by-label/nix-swap"; }];
 
-  # Ba/sic networking configuration
+  # Basic networking configuration
   networking.useDHCP = lib.mkDefault true;
   networking.hostName = "t480";
+
+  # Intel 6th-8th Gen (Skylake / Kaby Lake-R) specific mitigations & IOMMU
+  boot.kernelParams = [
+    "spectre_v2=retpoline"
+    "retbleed=stuff"
+  ];
 
   services.xserver.xkb = {
     layout = "br";

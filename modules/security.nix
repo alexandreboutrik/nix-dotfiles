@@ -43,13 +43,14 @@
     # packet loss.
     "net.ipv4.tcp_sack" = 0;
     "net.ipv4.tcp_dsack" = 0;
-    "net.ipv4.tcp_fack" = 0;
 
     # SYSCTL: Disable sending ICMP redirects
     # Prevents the machine from acting as a router and spoofing
     # routing tables.
     "net.ipv4.conf.default.send_redirects" = 0;
     "net.ipv4.conf.all.send_redirects" = 0;
+    "net.ipv6.conf.default.accept_redirects" = 0;
+    "net.ipv6.conf.all.accept_redirects" = 0;
 
     # SYSCTL: Disable accepting ICMP redirects
     # Prevents malicious network hosts from altering the local
@@ -73,8 +74,8 @@
     # SYSCTL: Enable Reverse Path (RP) filtering
     # Drops spoofed packets by verifying the return path matches the
     # incoming interface.
-    "net.ipv4.conf.default.rp_filter" = 1;
-    "net.ipv4.conf.all.rp_filter" = 1;
+    "net.ipv4.conf.default.rp_filter" = 2;
+    "net.ipv4.conf.all.rp_filter" = 2;
 
     # SYSCTL: Log impossible (martian) addresses
     # Logs packets with source/destination addresses that are
@@ -135,6 +136,11 @@
     # a TTY terminal.
     "dev.tty.ldisc_autoload" = 0;
 
+    # SYSCTL: Disable legacy TIOCSTI ioctl input injection
+    # Blocks unprivileged processes from pushing characters into a
+    # controlling TTY.
+    "dev.tty.legacy_tiocsti" = 0;
+
     # SYSCTL: Disable unprivileged user namespaces
     # Reduces the kernel attack surface.
     # NOTICE: Breaks unprivileged containers (Docker/Podman), flatpaks,
@@ -150,7 +156,17 @@
 
     # SYSCTL: Restrict performance monitoring subsystem
     # Prevents unprivileged profiling and side-channel attacks via perf.
-    "kernel.perf_event_paranoid" = 3;
+    "kernel.perf_event_paranoid" = 2;
+
+    # SYSCTL: Limit kernel oopses before panicking
+    # Forces a system halt after 100 oopses to stop brute-force
+    # kernel exploitation loops.
+    "kernel.oops_limit" = 100;
+
+    # SYSCTL: Restrict io_uring to privileged processes
+    # Mitigates high-risk io_uring kernel vulnerabilities while
+    # allowing privileged services to use it if needed.
+    "kernel.io_uring_disabled" = 1;
 
     # ==================== #
     #      File System     #
@@ -158,7 +174,7 @@
 
     # SYSCTL: Disable core dumps for setuid processes
     # Prevents leaking credentials or sensitive memory to disk.
-    "fs.suid.dumpable" = 0;
+    "fs.suid_dumpable" = 0;
 
     # SYSCTL: Prevent hardlink and symlink spoofing
     # Mitigates Time-of-Check to Time-of-Use (TOCTOU) exploits in
@@ -200,7 +216,7 @@
     # Defeats Use-after-Free (UaF) information leaks.
     "init_on_alloc=1"
 
-    # Zero-fills memory when freed
+    # PARAM: Zero-fills memory when freed
     # Reduces sensitive data remnants in memory.
     "init_on_free=1"
 
@@ -221,7 +237,7 @@
 
     # PARAM: Enable Spectre v2 and v4 mitigations
     # Blocks speculative execution attacks.
-    "spectre_v2=on"
+    "spectre_v2_user=on"
     "spec_store_bypass_disable=on"
 
     # PARAM: Prevents huge-page side-channel attacks in VMs
@@ -237,12 +253,12 @@
     # Disables legacy 32-bit VDSO mapping to reduce attack surface.
     "vdso32=0"
 
-    # Disables Hyper-Threading (SMT)
+    # PARAM: Disables Hyper-Threading (SMT)
     # Kills Spectre, MDS, and TAA hardware vulnerabilities.
     # NOTICE: Will significantly reduce CPU multi-threading performance.
     #"nosmt=force"
 
-    # Disable FineIBT
+    # PARAM: Disable FineIBT
     # Uses pure KCFI as it provides stronger control-flow integrity.
     "cfi=kcfi"
 
@@ -257,14 +273,117 @@
 
     # PARAM: Disable debugfs
     # Removes a frequent source of kernel information leaks.
-    #"debugfs=off"
+    "debugfs=off"
+
+    # PARAM: Disable PCI bus-mastering DMA during early EFI boot
+    # Closes the pre-IOMMU window against malicious PCIe/Thunderbolt
+    # DMA attacks.
+    "efi=disable_early_pci_dma"
+
+    # PARAM: Enable Intel IOMMU (VT-d)
+    # Isolates PCIe devices to prevent arbitrary DMA access to RAM.
+    # NOTICE: Intel CPUs only; omit on AMD systems.
+    "intel_iommu=on"
+
+    # PARAM: Enforce strict IOMMU TLB invalidation
+    # Immediately invalidates DMA mappings on unmap to prevent
+    # stale-page access by malicious peripherals.
+    "iommu.strict=1"
+
+    # PARAM: Block raw writes to mounted block devices
+    # Prevents root from corrupting live filesystem metadata to
+    # exploit kernel filesystem parsers.
+    "bdev_allow_write_mounted=0"
+
+    # PARAM: Prevent force-writing read-only process memory via /proc
+    # Blocks overwriting read-only executable code pages through
+    # /proc/PID/mem.
+    "proc_mem.force_override=never"
   ];
 
-  # Cloudlfare DNS.
-  networking.nameservers = [ "1.1.1.1" "1.1.0.0" ];
+  boot.blacklistedKernelModules = [
+    # ==================== #
+    #   Blacklisted Mods   #
+    # ==================== #
+
+    # MODULE: Legacy floppy disk driver
+    # Eliminates obsolete driver code with a history of memory bugs.
+    "floppy"
+
+    # MODULE: GSM 07.10 TTY line discipline
+    # Removes a frequent target for local privilege escalation exploits.
+    "n_gsm"
+
+    # MODULE: Hardware memory error injection
+    # Disables fault-injection testing interfaces not needed in production.
+    "hwpoison-inject"
+
+    # MODULE: Intel Atom Power Control Unit debug interface
+    # Removes unnecessary hardware debugging surface.
+    "punit_atom_debug"
+
+    # MODULE: Userspace ACPI table loading via configfs
+    # Prevents loading custom AML bytecode with full hardware access.
+    "acpi_configfs"
+
+    # MODULE: RAM-backed Memory Technology Device emulators
+    # Blocks mapping arbitrary physical RAM as MTD block devices.
+    "slram"
+    "phram"
+
+    # MODULE: Userspace block device driver (io_uring-backed)
+    # Reduces complex io_uring-adjacent kernel attack surface.
+    "ublk_drv"
+
+    # MODULE: In-kernel SMB3 server (ksmbd)
+    # Removes high-risk in-kernel network server code (does not affect
+    # SMB clients or userspace Samba).
+    "ksmbd"
+
+    # MODULE: Uncommon network protocols (TIPC, SCTP)
+    # Prevents unprivileged socket creation from auto-loading
+    # bug-prone kernel protocol stacks.
+    "tipc"
+    "sctp"
+  ];
+
+  # Mandatory Access Control for supported NixOS services
+  security.apparmor = {
+    enable = true;
+    killUnconfinedConfinables = true;
+  };
+
+  # Disables hibernation and kexec at the NixOS module level
+  security.protectKernelImage = true;
+
+  # Prevent NetworkManager from pushing DHCP DNS servers to systemd-resolved
+  networking.networkmanager.dns = lib.mkForce "none";
+  networking.networkmanager.settings.main.systemd-resolved = false;
+
+  # Encrypted DNS via Cloudflare (DNS-over-TLS)
+  networking.nameservers = [
+    "1.1.1.1#cloudflare-dns.com"
+    "1.0.0.1#cloudflare-dns.com"
+  ];
+  services.resolved = {
+    enable = true;
+    settings.Resolve = {
+      DNSSEC = "true";
+      Domains = [ "~." ];
+      FallbackDNS = [
+        "1.1.1.1#cloudflare-dns.com"
+        "1.0.0.1#cloudflare-dns.com"
+      ];
+      DNSOverTLS = "opportunistic";
+      LLMNR = "false";
+    };
+  };
 
   # Randomize MAC Address.
-  networking.networkmanager.wifi.macAddress = "random";
+  networking.networkmanager.wifi = {
+    macAddress = "random";
+    scanRandMacAddress = true;
+  };
 
   # Lockme.
   security.pam.services.lockme = { };
