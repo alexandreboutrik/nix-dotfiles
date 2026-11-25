@@ -10,6 +10,30 @@
     man-pages
     tree-sitter
 
+    (pkgs.buildFHSEnv {
+      name = "alr";
+      targetPkgs = pkgs: with pkgs; [
+        alire
+        git
+        gnumake
+        pkg-config
+        binutils
+        gcc
+        stdenv.cc.cc.lib
+        glibc
+        glibc.dev
+        gmp
+        gmp.dev
+        zstd
+        openssl
+        openssl.dev
+        zlib
+        zlib.dev
+        ncurses
+      ];
+      runScript = "alr";
+    })
+
     # C / C++
     glibc.static
     llvm
