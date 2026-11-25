@@ -1,3 +1,6 @@
 #!/usr/bin/env bash
 
-nft flush ruleset
+nft -f - <<'EOF'
+table inet filter {}
+delete table inet filter
+EOF

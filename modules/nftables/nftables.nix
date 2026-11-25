@@ -1,5 +1,9 @@
 { config, lib, pkgs, ... }:
 
+let
+  startScript = pkgs.writeShellScript "nftables-start" (builtins.readFile ./nftables-start.sh);
+  stopScript = pkgs.writeShellScript "nftables-stop" (builtins.readFile ./nftables-stop.sh);
+in
 {
   # Disable default firewall to use custom rules.
   networking.firewall.enable = false;
@@ -11,16 +15,18 @@
   systemd.services.nftables-custom = {
     description = "Custom nftables firewall rules";
     wantedBy = [ "multi-user.target" ];
-    after = [ "network.target" ];
-    before = [ "docker.service" ];
+    wants = [ "network-pre.target" ];
+    before = [ "network-pre.target" "docker.service" ];
+    reloadIfChanged = true;
 
     path = [ "/run/current-system/sw" pkgs.nftables ];
 
     serviceConfig = {
       Type = "oneshot";
 
-      ExecStart = pkgs.writeShellScript "nftables-start" (builtins.readFile ./nftables-start.sh);
-      ExecStop = pkgs.writeShellScript "nftables-stop" (builtins.readFile ./nftables-stop.sh);
+      ExecStart = startScript;
+      ExecReload = startScript;
+      ExecStop = stopScript;
 
       RemainAfterExit = true;
     };

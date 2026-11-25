@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 
 nft -f - <<'EOF'
-flush ruleset
+table inet filter {}
+flush table inet filter
 
 table inet filter {
     # Dedicated chain for logging and dropping port scans
     chain scanner {
-        log prefix "NFTables SCANNER: " level warn
+        limit rate 5/minute burst 10 packets log prefix "NFTables SCANNER: " level warn
         drop
     }
 
@@ -16,23 +17,23 @@ table inet filter {
         # Allow Loopback
         iif "lo" accept
 
+        # Essential ICMPv6 for Neighbor Discovery & PMTUD (required for IPv6)
+        icmpv6 type { nd-neighbor-solicit, nd-neighbor-advert, nd-router-advert, packet-too-big, time-exceeded, destination-unreachable } accept
+
+        # Port scanning protection (TCP flag mapping)
+        iifname "wlan0" tcp flags == fin | psh | urg goto scanner
+        iifname "wlan0" tcp flags == 0 goto scanner
+        iifname "wlan0" tcp flags == fin | syn goto scanner
+        iifname "wlan0" tcp flags == syn | rst | ack | fin | urg goto scanner
+        iifname "wlan0" tcp flags & (syn | rst) == syn | rst goto scanner
+        iifname "wlan0" tcp flags & (syn | fin) == syn | fin goto scanner
+ 
         # Connection Tracking
         ct state invalid drop
         ct state { established, related } accept
 
         # INCUS VMs -> Host
         iifname "incusbr0" accept
-
-        # Anti-spoofing on wlan0
-        iif "wlan0" ip saddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 } drop
-
-        # Port scanning protection (TCP flag mapping)
-        iif "wlan0" tcp flags == fin | psh | urg goto scanner
-        iif "wlan0" tcp flags == 0 goto scanner
-        iif "wlan0" tcp flags == fin | syn goto scanner
-        iif "wlan0" tcp flags == syn | rst | ack | fin | urg goto scanner
-        iif "wlan0" tcp flags & (syn | rst) == syn | rst goto scanner
-        iif "wlan0" tcp flags & (syn | fin) == syn | fin goto scanner
     }
 
     chain forward {
@@ -50,21 +51,22 @@ table inet filter {
         oif "lo" accept
 
         # Connection Tracking (Global established/related)
+        ct state invalid drop
         ct state { established, related } accept
 
         # Allowed Outbound Services
-        tcp dport { 22, 80, 443, 8003, 22212 } ct state new accept
-        udp dport 53 ct state new accept
-        tcp dport 53 ct state new accept
+        tcp dport { 22, 53, 80, 443, 853, 8003, 22212 } ct state new accept
+        udp dport { 53, 67, 123, 547 } ct state new accept
 
-				# Allow VPN WireGuard tunnel
-				udp dport 51820 ct state new accept
+        # Allow VPN WireGuard tunnel
+        udp dport 51820 ct state new accept
 
         # Host -> INCUS VMs
         oifname "incusbr0" accept
 
         # Allow outbound ping
         icmp type echo-request accept
+        icmpv6 type { echo-request, nd-neighbor-solicit, nd-neighbor-advert, nd-router-solicit, packet-too-big, time-exceeded, destination-unreachable } accept
     }
 }
 EOF
