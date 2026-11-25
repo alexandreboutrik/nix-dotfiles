@@ -24,7 +24,8 @@ vim.api.nvim_create_autocmd("FileType", {
 				syntax match AcslIff /<==>/ contained conceal cchar=⇔
 				syntax match AcslAnd /&&/ containedin=ALL conceal cchar=∧
 				syntax match AcslOr /||/ containedin=ALL conceal cchar=∨
-				syntax match AcslXor /\^/ containedin=ALL conceal cchar=⊕
+				syntax match AcslXor /\s\zs\^\ze\s/ containedin=ALL conceal cchar=⊕
+				syntax match AcslXor /\^\ze=/ containedin=ALL conceal cchar=⊕
 				syntax match AcslNot /!\([=]\)\@!/ contained conceal cchar=¬
 				syntax match AcslTrue /\\true\>/ contained conceal cchar=⊤
 				syntax match AcslFalse /\\false\>/ contained conceal cchar=⊥
