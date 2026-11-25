@@ -23,7 +23,7 @@ hl.monitor({
 ---- MY PROGRAMS ----
 ---------------------
 
-local terminal    = "alacritty -o font.size=14"
+local terminal    = "alacritty -o font.size=13"
 local browser     = "firefox"
 local office      = "libreoffice"
 local screenshot  = 'grim -g "$(slurp)" ~/Screenshots/screenshot-$(date +%F_%T).png'
